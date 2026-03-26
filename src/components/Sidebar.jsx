@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Zap, Info, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, Zap, Info, LogOut, Activity, X } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, closeSidebar }) => {
   const location = useLocation();
 
   const navItems = [
@@ -11,16 +11,22 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-logo">
-        <Activity size={24} color="var(--accent-blue)" />
-        <span className="text-gradient">DeepFish AI</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Activity size={24} color="var(--accent-blue)" />
+          <span className="text-gradient">DeepFish AI</span>
+        </div>
+        <button className="close-sidebar-btn" onClick={closeSidebar}>
+          <X size={24} color="var(--text-secondary)" />
+        </button>
       </div>
       <div className="sidebar-nav">
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
+            onClick={closeSidebar}
             className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
           >
             {item.icon}
@@ -29,7 +35,7 @@ const Sidebar = () => {
         ))}
       </div>
       <div className="sidebar-footer">
-        <Link to="/login" className="nav-item text-danger">
+        <Link to="/login" className="nav-item text-danger" onClick={closeSidebar}>
           <LogOut size={18} />
           Logout
         </Link>

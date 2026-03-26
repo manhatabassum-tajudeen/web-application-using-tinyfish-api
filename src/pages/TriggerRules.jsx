@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
-import { PlusCircle, Search, Target, Bell, Settings2, Play } from 'lucide-react';
+import { PlusCircle, Search, Target, Bell, Settings2, Play, Sparkles } from 'lucide-react';
 
 const TriggerRules = () => {
   const formRef = useRef(null);
   
+  const [aiEnabled, setAiEnabled] = useState(false);
   const [rules, setRules] = useState([
     {
       id: 1,
@@ -33,7 +34,6 @@ const TriggerRules = () => {
   const handleNewPipelineClick = () => {
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // add a brief highlight effect
       formRef.current.style.boxShadow = '0 0 20px var(--accent-blue)';
       setTimeout(() => {
         if (formRef.current) formRef.current.style.boxShadow = 'var(--shadow-card)';
@@ -43,28 +43,27 @@ const TriggerRules = () => {
 
   const handleDeploy = () => {
     if (!formData.url || !formData.selector) {
-       alert("Please fill in the Data Source Target URL and Extracted Element Selector.");
+       alert("Please fill in the Data Source Target URL and extraction details.");
        return;
     }
 
     const newRule = {
       id: Date.now(),
       target: `Monitor ${new URL(formData.url).hostname || formData.url}`,
-      condition: `${formData.selector} ${formData.evaluation} ${formData.threshold}`,
+      condition: aiEnabled ? `AI Search: "${formData.selector}" ${formData.evaluation} ${formData.threshold}` : `${formData.selector} ${formData.evaluation} ${formData.threshold}`,
       action: 'Send UI Alert & Log Action',
       status: 'active',
-      iconType: 'target'
+      iconType: aiEnabled ? 'search' : 'target'
     };
 
     setRules([newRule, ...rules]);
     setFormData({ url: '', selector: '', evaluation: 'Less Than', threshold: '' }); // reset form
     
-    // scroll back to top to see new rule
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderIcon = (type) => {
-    if (type === 'search') return <Search size={16} color="var(--text-muted)" />;
+    if (type === 'search') return <Sparkles size={16} color="var(--accent-blue)" />;
     return <Target size={16} color="var(--text-muted)" />;
   };
 
@@ -75,7 +74,7 @@ const TriggerRules = () => {
           <h1 className="page-title">Trigger Logic Engine</h1>
           <p className="page-subtitle">Configure "If-This-Then-That" parameters for automated responses to market shifts.</p>
         </div>
-        <button className="btn-primary" onClick={handleNewPipelineClick} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button className="btn-primary" onClick={handleNewPipelineClick} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}>
           <PlusCircle size={18} />
           <span>New Pipeline</span>
         </button>
@@ -129,16 +128,22 @@ const TriggerRules = () => {
                    onChange={e => setFormData({...formData, url: e.target.value})}
                  />
                </div>
+               
+               {/* Dynamically adjust this field based on A.I. Engine status */}
                <div className="form-group" style={{ marginBottom: 0 }}>
-                 <label className="input-label">Extracted Element Selector (CSS/XPath)</label>
+                 <label className="input-label" style={{ color: aiEnabled ? 'var(--accent-blue)' : 'var(--text-secondary)' }}>
+                    {aiEnabled ? "A.I. Prompt (Describe what to extract)" : "Extracted Element Selector (CSS/XPath)"}
+                 </label>
                  <input 
                    type="text" 
                    className="input-field" 
-                   placeholder=".price-tag-value"
+                   style={{ borderColor: aiEnabled ? 'var(--accent-blue)' : 'var(--border-color)' }}
+                   placeholder={aiEnabled ? "e.g., 'Extract the price of the red iteration'" : ".price-tag-value"}
                    value={formData.selector}
                    onChange={e => setFormData({...formData, selector: e.target.value})}
                  />
                </div>
+               
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                  <div className="form-group" style={{ marginBottom: 0 }}>
                    <label className="input-label">Evaluation Logic</label>
@@ -166,17 +171,35 @@ const TriggerRules = () => {
                  </div>
                </div>
                <button className="btn-primary" onClick={handleDeploy} style={{ marginTop: '0.5rem', width: '100%' }}>
-                 Deploy Pipeline Worker
+                 {aiEnabled ? "Deploy Neural Worker" : "Deploy Pipeline Worker"}
                </button>
            </div>
         </div>
-        <div className="glass-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', gap: '1rem', borderStyle: 'dashed', background: 'transparent' }}>
-            <Settings2 size={48} color="var(--border-color)" />
+        
+        {/* A.I. Parsing Engine Toggle Block */}
+        <div className="glass-panel" style={{ 
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', gap: '1rem', 
+            borderStyle: aiEnabled ? 'solid' : 'dashed', 
+            borderColor: aiEnabled ? 'var(--accent-blue)' : 'var(--border-color)', 
+            background: aiEnabled ? 'rgba(0, 229, 255, 0.05)' : 'transparent',
+            transition: 'all 0.3s ease'
+          }}>
+            {aiEnabled ? <Sparkles size={48} color="var(--accent-blue)" /> : <Settings2 size={48} color="var(--border-color)" />}
             <div>
-              <h3 style={{ color: 'var(--text-secondary)' }}>Advanced Neural Connectors</h3>
-              <p className="text-muted" style={{ fontSize: '0.9rem', maxWidth: '300px', margin: '0.5rem auto 0' }}>Connect TinyFish LLMs to parse unstructured web data automatically before evaluating trigger conditions.</p>
+              <h3 style={{ color: aiEnabled ? '#fff' : 'var(--text-secondary)' }}>Advanced Neural Connectors</h3>
+              <p className="text-muted" style={{ fontSize: '0.9rem', maxWidth: '300px', margin: '0.5rem auto 0' }}>
+                {aiEnabled 
+                  ? "TinyFish LLMs are actively engaged, translating your natural language prompt into dynamic extraction logic." 
+                  : "Connect TinyFish LLMs to parse unstructured web data automatically using plain English before evaluating trigger conditions."}
+              </p>
             </div>
-            <button className="btn-secondary" style={{ marginTop: '1rem' }}>Enable A.I. Parsing Engine</button>
+            <button 
+              className={aiEnabled ? "btn-primary" : "btn-secondary"} 
+              style={{ marginTop: '1rem' }}
+              onClick={() => setAiEnabled(!aiEnabled)}
+            >
+              {aiEnabled ? "A.I. Engine Enabled (Click to Disable)" : "Enable A.I. Parsing Engine"}
+            </button>
         </div>
       </div>
     </div>

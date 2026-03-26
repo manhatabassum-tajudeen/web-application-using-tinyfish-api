@@ -12,6 +12,12 @@
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.sidebar-overlay {
+  display: none;
 }
 
 .sidebar-logo {
@@ -19,10 +25,14 @@
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: space-between;
   margin-bottom: 2.5rem;
   padding: 0 0.5rem;
   color: var(--accent-blue);
+}
+
+.close-sidebar-btn {
+  display: none;
 }
 
 .sidebar-nav {
@@ -56,6 +66,13 @@
 .sidebar-footer {
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .top-bar {
@@ -213,56 +230,63 @@
 /* Responsive Mobile Layout */
 @media (max-width: 768px) {
   .layout {
-    flex-direction: column-reverse; /* Put sidebar at bottom */
+    flex-direction: column;
   }
 
   .sidebar {
-    width: 100%;
-    height: 70px;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 100;
-    position: sticky;
-    bottom: 0;
+    position: fixed;
+    top: 0;
+    left: -100vw; /* Hidden offscreen by default */
+    height: 100vh;
+    width: 100vw; /* Make it full screen to avoid cramped text */
+    padding: 2rem; /* Add more padding for a better look */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    background: var(--bg-surface);
   }
 
   .sidebar-logo {
-    display: none; /* Hide logo on mobile bottom nav */
+    margin-bottom: 3rem;
   }
-
-  .sidebar-nav {
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    width: 100%;
-    margin: 0;
-  }
-
+  
   .nav-item {
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.5rem;
-    font-size: 0.75rem;
-    background: transparent !important;
-    border: none !important;
+    padding: 1rem;
+    font-size: 1.1rem;
   }
 
-  .nav-item.active {
-    color: var(--accent-blue);
+  .sidebar.open {
+    left: 0;
   }
 
-  .sidebar-footer {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+
+  .close-sidebar-btn {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .hide-on-mobile {
     display: none;
   }
 
   .main-content {
     flex: 1;
-    padding: 1rem;
-    height: calc(100vh - 70px);
+    height: 100vh;
   }
 
   .top-bar {
@@ -293,9 +317,7 @@
     font-size: 1.5rem;
   }
 
-  /* Target inline grid from React */
   div[style*="grid-template-columns: 1fr 1fr"] {
     grid-template-columns: 1fr !important;
   }
 }
-
